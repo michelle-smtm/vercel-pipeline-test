@@ -1,0 +1,78 @@
+# This workflow encompasses actions necessary to deploy new changes to the SMTM FE
+
+name: SMTM FE Deployment Workflow
+
+on:
+  push:
+    branches: [ "main" ]
+    
+env:
+  AWS_REGION: us-east-1
+
+jobs:
+  deploy-beta:
+    permissions:
+      id-token: write
+      contents: read
+      
+    name: Deploy Beta
+    runs-on: ubuntu-latest
+    environment: 'Beta'
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-region: us-east-1
+        role-to-assume: arn:aws:iam::836899195270:role/github-oidc-role
+        role-session-name: GithubActionsCdkSession
+    - name: Run CDK Deployment
+      id: run-cdk-diff
+      run: |
+        cd smtm-cdk
+        npm install -g aws-cdk
+        npm install
+        npm run build
+        cdk deploy SmtmCdkStack-beta --require-approval=never --verbose
+  deploy-prod:
+    permissions: 
+      id-token: write
+      issues: write
+      contents: read
+      
+    name: Deploy Prod
+    runs-on: ubuntu-latest
+    environment: 'Prod'
+    needs: [deploy-beta]
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+    - name: Manual Approval Step
+      uses: trstringer/manual-approval@v1
+      with:
+        secret: ${{ github.TOKEN }}
+        approvers: michelle-smtm, sonali-smtm, JeremyKritz-smtm, cameron-smtm
+        minimum-approvals: 1
+        issue-title: "Deploying to prod from beta"
+        issue-body: "Please approve or deny the deployment"
+        exclude-workflow-initiator-as-approver: false
+        additional-approved-words: ''
+        additional-denied-words: ''
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-region: us-east-1
+        role-to-assume: arn:aws:iam::836899195270:role/github-oidc-role
+        role-session-name: GithubActionsCdkSession
+    - name: Run CDK Deployment
+      id: run-cdk-diff
+      run: |
+        cd smtm-cdk
+        npm install -g aws-cdk
+        npm install
+        npm run build
+        cdk deploy SmtmCdkStack-prod --require-approval=never --verbose
