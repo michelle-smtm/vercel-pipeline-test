@@ -42,15 +42,18 @@ jobs:
     # https://github.com/marketplace/actions/pull-request-action-github-cli
     - name: Create PR
       uses: peter-evans/create-pull-request@v5
+      id: cpr
+      with:
+        base: "main"
       env:
         GITHUB_TOKEN: ${{ secrets.CUSTOM_GITHUB_ACCESS_TOKEN }} 
     - uses: hmarr/auto-approve-action@v3
       with:
-        pull-request-number: ${{ steps.cpr.outputs.pr_number }}
+        pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
     # # https://github.com/marketplace/actions/enable-pull-request-automerge
     - name: enable automerge
       uses: peter-evans/enable-pull-request-automerge@v2
       with:
         token: ${{ secrets.CUSTOM_GITHUB_ACCESS_TOKEN }}
-        pull-request-number: ${{ steps.cpr.outputs.pr_number }}
+        pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
         merge-method: merge
