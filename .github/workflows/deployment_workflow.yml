@@ -6,9 +6,6 @@ name: SMTM FE Deployment Workflow
 on:
   push:
     branches: [ "staging" ]
-    
-env:
-  CUSTOM_GITHUB_ACCESS_TOKEN: ${{ secrets.CUSTOM_GITHUB_ACCESS_TOKEN }}
 
 jobs:
   deploy-prod:
@@ -27,7 +24,7 @@ jobs:
     - name: Manual Approval Step
       uses: trstringer/manual-approval@v1
       with:
-        secret: ${{ secrets.CUSTOM_GITHUB_ACCESS_TOKEN }}
+        secret: ${{ github.TOKEN }}
         approvers: michelle-smtm
         minimum-approvals: 1
         issue-title: "Deploying to prod from staging"
@@ -41,7 +38,7 @@ jobs:
       uses: mtanzi/action-automerge@v1
       id: merge
       with:
-        github_token: ${{ secrets.CUSTOM_GITHUB_ACCESS_TOKEN }}
+        github_token: ${{ github.TOKEN }}
         source: 'staging'
         target: 'main'
         webhook_url: #if present add the Slack webhook
