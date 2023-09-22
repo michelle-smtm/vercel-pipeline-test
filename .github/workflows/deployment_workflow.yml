@@ -53,5 +53,5 @@ jobs:
       uses: peter-evans/enable-pull-request-automerge@v2
       with:
         token: ${{ secrets.CUSTOM_GITHUB_ACCESS_TOKEN }}
-        pull-request-number: ${{ github.event.pull_request.number }}
+        pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
         merge-method: merge
