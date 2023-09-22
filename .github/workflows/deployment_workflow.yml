@@ -5,34 +5,21 @@ name: SMTM FE Deployment Workflow
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "staging" ]
     
 env:
-  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  CUSTOM_GITHUB_ACCESS_TOKEN: ${{ secrets.CUSTOM_GITHUB_ACCESS_TOKEN }}
 
 jobs:
-  deploy-staging:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Install Vercel CLI
-        run: npm install --global vercel@latest
-      - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
-      - name: Build Project Artifacts
-        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
-      - name: Deploy Project Artifacts to Vercel
-        run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
   deploy-prod:
     permissions: 
       id-token: write
       issues: write
       contents: read
+      pull-requests: write
       
     name: Deploy Prod
     runs-on: ubuntu-latest
-    needs: [deploy-staging]
 
     steps:
     - name: Checkout Code
@@ -40,20 +27,43 @@ jobs:
     - name: Manual Approval Step
       uses: trstringer/manual-approval@v1
       with:
-        secret: ${{ github.TOKEN }}
+        secret: ${{ secrets.CUSTOM_GITHUB_ACCESS_TOKEN }}
         approvers: michelle-smtm
         minimum-approvals: 1
-        issue-title: "Deploying to prod from beta"
+        issue-title: "Deploying to prod from staging"
         issue-body: "Please approve or deny the deployment"
         exclude-workflow-initiator-as-approver: false
         additional-approved-words: ''
         additional-denied-words: ''
-    - uses: actions/checkout@v2
-    - name: Install Vercel CLI
-      run: npm install --global vercel@latest
-    - name: Pull Vercel Environment Information
-      run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-    - name: Build Project Artifacts
-      run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-    - name: Deploy Project Artifacts to Vercel
-      run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+    - name: Checkout code
+      uses: actions/checkout@v3
+    - name: Merge into main
+      uses: mtanzi/action-automerge@v1
+      id: merge
+      with:
+        github_token: ${{ secrets.CUSTOM_GITHUB_ACCESS_TOKEN }}
+        source: 'staging'
+        target: 'main'
+        webhook_url: #if present add the Slack webhook
+    # - name: Checkout code
+    #   uses: actions/checkout@v3
+    #   with:
+    #     token: ${{ secrets.CUSTOM_GITHUB_ACCESS_TOKEN }}
+    # # https://github.com/marketplace/actions/pull-request-action-github-cli
+    # - name: Create PR
+    #   uses: peter-evans/create-pull-request@v5
+    #   id: cpr
+    #   with:
+    #     base: "main"
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.CUSTOM_GITHUB_ACCESS_TOKEN }} 
+    # - uses: hmarr/auto-approve-action@v3
+    #   with:
+    #     pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
+    # # # https://github.com/marketplace/actions/enable-pull-request-automerge
+    # - name: enable automerge
+    #   uses: peter-evans/enable-pull-request-automerge@v2
+    #   with:
+    #     token: ${{ secrets.CUSTOM_GITHUB_ACCESS_TOKEN }}
+    #     pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
+    #     merge-method: merge
