@@ -44,10 +44,9 @@ jobs:
       with:
         token: ${{ secrets.CUSTOM_GITHUB_ACCESS_TOKEN }}
     - name: Auto approve
-      if: steps.cpr.outputs.pull-request-operation == 'created'
       run: gh pr review --approve "${{ steps.cpr.outputs.pull-request-number }}"
       env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ secrets.CUSTOM_GITHUB_ACCESS_TOKEN }}
     # https://github.com/marketplace/actions/enable-pull-request-automerge
     - name: enable automerge
       uses: peter-evans/enable-pull-request-automerge@v2
