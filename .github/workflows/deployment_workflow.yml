@@ -1,4 +1,4 @@
-# This workflow encompasses actions necessary to deploy new changes to the SMTM FE
+# This workflow encompasses actions necessary to deploy new changes to the SMTM
 # https://vercel.com/guides/how-can-i-use-github-actions-with-vercel
 name: SMTM FE Deployment Workflow
 
