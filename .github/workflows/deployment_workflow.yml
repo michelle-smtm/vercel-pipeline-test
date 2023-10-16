@@ -29,7 +29,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: skip-workflow
-        id: skip-workflow # id used for referencing step
+        id: skip-workflow 
         uses: saulmaldonado/skip-workflow@v1
         with:
           phrase: 'skip-workflow'
