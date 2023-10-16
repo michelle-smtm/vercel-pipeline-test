@@ -71,5 +71,5 @@ jobs:
         github_token: ${{ secrets.CUSTOM_GITHUB_ACCESS_TOKEN }}
         source: 'staging'
         target: 'main'
-        webhook_url: #if present add the Slack webhook
+        webhook_url:
   
