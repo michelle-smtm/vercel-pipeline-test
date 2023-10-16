@@ -55,7 +55,7 @@ jobs:
       uses: trstringer/manual-approval@v1
       with:
         secret: ${{ secrets.CUSTOM_GITHUB_ACCESS_TOKEN }}
-        approvers: michelle-smtm, sonali-smtm, cameron-smtm, KennyJJMa, briannwaeke1
+        approvers: michelle-smtm
         minimum-approvals: 1
         issue-title: "Deploying to prod from staging"
         issue-body: "Please approve or deny the deployment"
